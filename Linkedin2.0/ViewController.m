@@ -112,7 +112,10 @@
 
 - (NSString*)getAuthorizationCodeWithRequestString:(NSString*)urlString
 {
-    NSString *parameters = [urlString substringFromIndex:[LK_API_REDIRECT length] + 1];
+    int lenght = [LK_API_REDIRECT length];
+    if([LK_API_REDIRECT hasSuffix:@"/"])
+        lenght++;
+    NSString *parameters = [urlString substringFromIndex:lenght];
     NSArray *pairs = [parameters componentsSeparatedByString:@"&"];
     NSString *auth = @"";
     
