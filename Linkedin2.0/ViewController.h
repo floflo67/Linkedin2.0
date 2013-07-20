@@ -11,6 +11,8 @@
 @interface ViewController : UIViewController
 
 @property (weak, nonatomic) IBOutlet UIButton *buttonGetLinkedin;
+@property (weak, nonatomic) IBOutlet UIWebView *webView;
+
 - (IBAction)buttonGetLinkedinTouchDown:(id)sender;
 
 @end
