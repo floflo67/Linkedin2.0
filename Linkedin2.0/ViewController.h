@@ -10,4 +10,7 @@
 
 @interface ViewController : UIViewController
 
+@property (weak, nonatomic) IBOutlet UIButton *buttonGetLinkedin;
+- (IBAction)buttonGetLinkedinTouchDown:(id)sender;
+
 @end
