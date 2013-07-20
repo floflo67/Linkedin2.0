@@ -17,6 +17,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self.activityIndicator stopAnimating];
+    [self.webView setHidden:YES];
 }
 
 - (void)didReceiveMemoryWarning
@@ -33,6 +35,7 @@
  */
 - (IBAction)buttonGetLinkedinTouchDown:(id)sender
 {
+    [self.webView setHidden:NO];
     NSString *urlRequest = [NSString stringWithFormat:@"%@authorization?response_type=code&client_id=%@&state=%@&redirect_uri=%@", LK_API_URL, LK_API_KEY, LK_API_STATE, LK_API_REDIRECT];
     NSURLRequest *request = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:urlRequest]];
     [self.webView loadRequest:request];
@@ -55,18 +58,57 @@
             if(authorizationCode && ![authorizationCode isEqualToString:@""]) {
                 if([self requestAccesWithCode:authorizationCode]) {
                     [self.webView stopLoading];
+                    [self.webView removeFromSuperview];
+                    self.webView = nil;
                 }
             }
         }
+        else if(!userAllowedAccess) {
+            NSLog(@"User cancelled");
+            [self.webView setHidden:YES];
+            return NO;
+        }
         else {
-            NSLog(@"false");
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"loginViewDidFinish" object:self userInfo:nil];
-            [self dismissViewControllerAnimated:YES completion:nil];
+            NSLog(@"Error");
         }
     }
     
     return YES;
 }
+
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+    [self.activityIndicator startAnimating];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    [self.activityIndicator stopAnimating];
+}
+
+# pragma mark - Request delegate
+
+- (BOOL)requestAccesWithCode:(NSString*)authorizationCode
+{
+    NSString *urlRequest = [NSString stringWithFormat:@"%@accessToken?grant_type=authorization_code&code=%@&redirect_uri=%@&client_id=%@&client_secret=%@", LK_API_URL, authorizationCode,LK_API_REDIRECT, LK_API_KEY, LK_API_SECRET];
+    
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlRequest]];
+    
+    [request setHTTPMethod:@"POST"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField: @"Content-Type"];
+    
+    NSURLResponse *response;
+    
+    [self.activityIndicator startAnimating];
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:nil];
+    
+    [self settingUpData:data andResponse:response];
+    [self.activityIndicator stopAnimating];
+    
+    return YES;
+}
+
+#pragma mark - Custom functions
 
 - (NSString*)getAuthorizationCodeWithRequestString:(NSString*)urlString
 {
@@ -83,23 +125,6 @@
         }
     }
     return auth;
-}
-
-- (BOOL)requestAccesWithCode:(NSString*)authorizationCode
-{
-    NSString *urlRequest = [NSString stringWithFormat:@"%@accessToken?grant_type=authorization_code&code=%@&redirect_uri=%@&client_id=%@&client_secret=%@", LK_API_URL, authorizationCode,LK_API_REDIRECT, LK_API_KEY, LK_API_SECRET];
-    
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlRequest]];
-    
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField: @"Content-Type"];
-    
-    NSURLResponse *response;
-    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:nil];
-    
-    [self settingUpData:data andResponse:response];
-    
-    return YES;
 }
 
 - (void)settingUpData:(NSData*)data andResponse:(NSURLResponse*)response
