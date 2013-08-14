@@ -9,7 +9,8 @@
 #import "ViewController.h"
 
 @interface ViewController ()
-
+@property (nonatomic, strong) NSString *access_token;
+@property (nonatomic) NSInteger expires;
 @end
 
 @implementation ViewController
@@ -136,7 +137,8 @@
     
     if(statusCode == 200) {
         NSMutableDictionary *jsonDict = [NSMutableDictionary dictionaryWithDictionary:[NSJSONSerialization JSONObjectWithData:data options:0 error:nil]];
-        NSLog(@"%@", [jsonDict objectForKey:@"access_token"]);
+        self.access_token = [jsonDict objectForKey:@"access_token"];
+        self.expires = [[jsonDict objectForKey:@"expires_in"] intValue];
     }
     else {
         NSString* error = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
