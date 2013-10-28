@@ -33,6 +33,25 @@
         self.API_STATE = nil;
         self.API_SECRET = nil;
         
+        if(!API_KEY || !API_SECRET || !API_STATE)
+        {
+            NSMutableString *errorMessage = [[NSMutableString alloc] init];
+            
+            [errorMessage appendString:@"Error with:/n"];
+            
+            if(!API_KEY)
+                [errorMessage appendString:self.API_KEY];
+            if(!API_SECRET)
+                [errorMessage appendString:self.API_SECRET];
+            if(!API_STATE)
+                [errorMessage appendString:self.API_STATE];
+            
+            NSLog(@"%@", errorMessage);
+            
+            self = nil;
+            return self;
+        }
+        
         self.LinkedInWebView.delegate = self;
     }
     return self;
