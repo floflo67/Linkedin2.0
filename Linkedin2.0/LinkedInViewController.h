@@ -10,7 +10,7 @@
 
 @interface LinkedInViewController : UIViewController
 
--initWithAPIKey:(NSString*)API_KEY APIState:(NSString*)API_STATE;
--initWithAPIKey:(NSString*)API_KEY APIState:(NSString*)API_STATE andRedirect:(NSString*)URL_REDIRECT;
+-initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET andAPIState:(NSString*)API_STATE;
+-initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET APIState:(NSString*)API_STATE andRedirect:(NSString*)URL_REDIRECT;
 
 @end

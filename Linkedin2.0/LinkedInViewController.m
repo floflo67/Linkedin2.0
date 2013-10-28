@@ -8,10 +8,14 @@
 
 #import "LinkedInViewController.h"
 
+#define LK_API_URL (@"https://www.linkedin.com/uas/oauth2/")
+#define LK_API_FORMER_URL (@"https://api.linkedin.com/v1/")
+
 @interface LinkedInViewController ()
 @property (weak, nonatomic) IBOutlet UIWebView *LinkedInWebView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *LinkedInActivityIndicator;
 @property (strong, nonatomic) NSString* API_KEY;
+@property (strong, nonatomic) NSString* API_SECRET;
 @property (strong, nonatomic) NSString* API_STATE;
 @property (strong, nonatomic) NSString* URL_REDIRECT;
 
@@ -19,19 +23,20 @@
 
 @implementation LinkedInViewController
 
-- (id)initWithAPIKey:(NSString *)API_KEY APIState:(NSString *)API_STATE
+- (id)initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET andAPIState:(NSString*)API_STATE
 {
     self = [super init];
     if(self) {
         self.API_KEY = nil;
         self.API_STATE = nil;
+        self.API_SECRET = nil;
     }
     return self;
 }
 
-- (id)initWithAPIKey:(NSString *)API_KEY APIState:(NSString *)API_STATE andRedirect:(NSString *)URL_REDIRECT
+- (id)initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET APIState:(NSString*)API_STATE andRedirect:(NSString*)URL_REDIRECT
 {
-    self = [self initWithAPIKey:API_KEY APIState:API_STATE];
+    self = [self initWithAPIKey:API_KEY APISecret:API_SECRET andAPIState:API_STATE];
     
     if(self) {
         self.URL_REDIRECT = nil;
@@ -53,6 +58,13 @@
     if(!_API_KEY)
         _API_KEY = @"API_KEY missing";
     return _API_KEY;
+}
+
+- (NSString *)API_SECRET
+{
+    if(!_API_SECRET)
+        _API_SECRET = @"API_SECRET missing";
+    return _API_SECRET;
 }
 
 - (NSString*)API_STATE
