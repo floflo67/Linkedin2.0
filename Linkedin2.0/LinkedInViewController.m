@@ -14,10 +14,14 @@
 @interface LinkedInViewController () <UIWebViewDelegate>
 @property (weak, nonatomic) IBOutlet UIWebView *LinkedInWebView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *LinkedInActivityIndicator;
+
 @property (strong, nonatomic) NSString* API_KEY;
 @property (strong, nonatomic) NSString* API_SECRET;
 @property (strong, nonatomic) NSString* API_STATE;
 @property (strong, nonatomic) NSString* URL_REDIRECT;
+
+@property (strong, nonatomic) NSString* accessToken;
+@property (nonatomic) NSInteger expires;
 
 @end
 
@@ -76,7 +80,109 @@
     // Do any additional setup after loading the view from its nib.
 }
 
-#pragma mark - custom function
+#pragma mark - WebView delegate
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+{
+	NSURL *url = request.URL;
+	NSString *urlString = url.absoluteString;
+    BOOL requestForCallbackURL = ([urlString rangeOfString:[NSString stringWithFormat:@"%@?", self.URL_REDIRECT]].location != NSNotFound); // YES if success
+    BOOL userSubmit = ([urlString rangeOfString:@"submit"].location != NSNotFound); // YES if success
+    if (requestForCallbackURL && !userSubmit) {
+        BOOL userAllowedAccess = ([urlString rangeOfString:@"error"].location == NSNotFound); // YES if success
+        BOOL correctState = [urlString rangeOfString:self.API_STATE].location != NSNotFound; // YES if success
+        
+        if (userAllowedAccess && correctState) {
+            NSString *authorizationCode = [self getAuthorizationCodeWithRequestString:urlString];
+            if(authorizationCode && ![authorizationCode isEqualToString:@""]) {
+                if([self requestAccesWithCode:authorizationCode]) {
+                    [self.LinkedInWebView stopLoading];
+                    [self.LinkedInWebView removeFromSuperview];
+                    self.LinkedInWebView = nil;
+                }
+            }
+        }
+        else if(!userAllowedAccess) {
+            NSLog(@"User cancelled");
+            [self.LinkedInWebView setHidden:YES];
+            return NO;
+        }
+        else {
+            NSLog(@"Error");
+        }
+    }
+    
+    return YES;
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+    [self.LinkedInActivityIndicator startAnimating];
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    [self.LinkedInActivityIndicator stopAnimating];
+}
+
+# pragma mark - Request delegate
+
+- (BOOL)requestAccesWithCode:(NSString*)authorizationCode
+{
+    NSString *urlRequest = [NSString stringWithFormat:@"%@accessToken?grant_type=authorization_code&code=%@&redirect_uri=%@&client_id=%@&client_secret=%@", LK_API_URL, authorizationCode, self.URL_REDIRECT, self.API_KEY, self.API_SECRET];
+    
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlRequest]];
+    
+    [request setHTTPMethod:@"POST"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField: @"Content-Type"];
+    
+    NSURLResponse *response;
+    
+    [self.LinkedInActivityIndicator startAnimating];
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:nil];
+    
+    [self settingUpData:data andResponse:response];
+    [self.LinkedInActivityIndicator stopAnimating];
+    
+    return YES;
+}
+
+#pragma mark - Custom functions
+
+- (NSString*)getAuthorizationCodeWithRequestString:(NSString*)urlString
+{
+    int lenght = [self.URL_REDIRECT length];
+    if([self.URL_REDIRECT hasSuffix:@"/"])
+        lenght++;
+    NSString *parameters = [urlString substringFromIndex:lenght];
+    NSArray *pairs = [parameters componentsSeparatedByString:@"&"];
+    NSString *auth = @"";
+    
+	for (NSString *pair in pairs)
+    {
+        NSArray *elements = [pair componentsSeparatedByString:@"="];
+        if ([[elements objectAtIndex:0] isEqualToString:@"code"])
+        {
+            auth = [elements objectAtIndex:1];
+        }
+    }
+    return auth;
+}
+
+- (void)settingUpData:(NSData*)data andResponse:(NSURLResponse*)response
+{
+    NSInteger statusCode = [(NSHTTPURLResponse*)response statusCode];
+    
+    if(statusCode == 200) {
+        NSMutableDictionary *jsonDict = [NSMutableDictionary dictionaryWithDictionary:[NSJSONSerialization JSONObjectWithData:data options:0 error:nil]];
+        self.accessToken = [jsonDict objectForKey:@"access_token"];
+        self.expires = [[jsonDict objectForKey:@"expires_in"] intValue];
+    }
+    else {
+        NSString* error = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSLog(@"%@", error);
+    }
+}
 
 - (void)setViewSizeHeight:(float)height andWidth:(float)width
 {
