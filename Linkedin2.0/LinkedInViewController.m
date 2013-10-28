@@ -82,7 +82,7 @@
 
 #pragma mark - WebView delegate
 
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+- (BOOL)webView:(UIWebView*)webView shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType
 {
 	NSURL *url = request.URL;
 	NSString *urlString = url.absoluteString;
@@ -98,6 +98,7 @@
                 if([self requestAccesWithCode:authorizationCode]) {
                     [self.LinkedInWebView stopLoading];
                     [self.LinkedInWebView removeFromSuperview];
+                    [self dismissViewControllerAnimated:YES completion:nil];
                     self.LinkedInWebView = nil;
                 }
             }
@@ -115,12 +116,12 @@
     return YES;
 }
 
-- (void)webViewDidStartLoad:(UIWebView *)webView
+- (void)webViewDidStartLoad:(UIWebView*)webView
 {
     [self.LinkedInActivityIndicator startAnimating];
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView
+- (void)webViewDidFinishLoad:(UIWebView*)webView
 {
     [self.LinkedInActivityIndicator stopAnimating];
 }
@@ -199,7 +200,7 @@
     return _API_KEY;
 }
 
-- (NSString *)API_SECRET
+- (NSString*)API_SECRET
 {
     if(!_API_SECRET)
         _API_SECRET = @"API_SECRET missing";
