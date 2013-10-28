@@ -11,7 +11,7 @@
 #define LK_API_URL (@"https://www.linkedin.com/uas/oauth2/")
 #define LK_API_FORMER_URL (@"https://api.linkedin.com/v1/")
 
-@interface LinkedInViewController ()
+@interface LinkedInViewController () <UIWebViewDelegate>
 @property (weak, nonatomic) IBOutlet UIWebView *LinkedInWebView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *LinkedInActivityIndicator;
 @property (strong, nonatomic) NSString* API_KEY;
@@ -23,6 +23,8 @@
 
 @implementation LinkedInViewController
 
+#pragma mark - init
+
 - (id)initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET andAPIState:(NSString*)API_STATE
 {
     self = [super init];
@@ -30,6 +32,8 @@
         self.API_KEY = nil;
         self.API_STATE = nil;
         self.API_SECRET = nil;
+        
+        self.LinkedInWebView.delegate = self;
     }
     return self;
 }
@@ -45,10 +49,20 @@
     return self;
 }
 
+#pragma mark - view life cycle
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+}
+
+#pragma mark - custom function
+
+- (void)setViewSizeHeight:(float)height andWidth:(float)width
+{
+    self.view.frame = CGRectMake(0, 0, height, width);
+    self.LinkedInWebView.frame = self.view.frame;
 }
 
 #pragma mark - Accessors

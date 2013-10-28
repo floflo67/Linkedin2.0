@@ -13,4 +13,6 @@
 -initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET andAPIState:(NSString*)API_STATE;
 -initWithAPIKey:(NSString*)API_KEY APISecret:(NSString*)API_SECRET APIState:(NSString*)API_STATE andRedirect:(NSString*)URL_REDIRECT;
 
+-(void)setViewSizeHeight:(float)height andWidth:(float)width;
+
 @end
