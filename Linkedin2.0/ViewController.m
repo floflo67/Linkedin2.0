@@ -8,6 +8,9 @@
 
 #import "ViewController.h"
 
+#import "LinkedInViewController.h"
+#import "Constants.h"
+
 @interface ViewController ()
 @property (nonatomic, weak) IBOutlet UIButton *buttonUpdate;
 @property (nonatomic, weak) IBOutlet UIButton *buttonGetLinkedin;
@@ -24,9 +27,13 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self.activityIndicator stopAnimating];
+    
+    LinkedInViewController* lk = [[LinkedInViewController alloc] initWithAPIKey:LK_API_KEY APISecret:nil andAPIState:nil];
+    lk = nil;
+    
+    /*[self.activityIndicator stopAnimating];
     [self.webView setHidden:YES];
-    [self.buttonUpdate setHidden:YES];
+    [self.buttonUpdate setHidden:YES];*/
 }
 
 #pragma mark - button events
